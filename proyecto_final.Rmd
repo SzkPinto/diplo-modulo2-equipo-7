@@ -15,4 +15,12 @@ library(DBI)
 library(dbplyr)
 library(RSQLite)
 
-conn <- DBI::dbConnect(RSQLite::SQLite(), "vuelos.db")
+```
+
+
+```{r}
+conn <- DBI::dbConnect(RSQLite::SQLite(), "Vuelos.db")
+(tablas <- dbListTables(conn))
+(length(tablas))
+```
+
