@@ -1,26 +1,109 @@
 ---
 title: "Proyecto final módulo 2"
-author: "Equipo - n"
+author: "Equipo - 7"
 output: html_document
 ---
 
 # Integrantes:
 
-+ Integrante 1. Rol: Administrador
-+ Integrante 2. Rol: Colaborador 1
-+ Integrante 3. Rol: Colaborador 2
++ Integrante 1. Rol: Administrador. Reyna Suzuky Pinto González.
++ Integrante 2. Rol: Colaborador 1. Isaac Mejia Montes de Oca.
++ Integrante 3. Rol: Colaborador 2. Sinaí Espinosa Vargas.
 
 ```{r}
 library(DBI)
 library(dbplyr)
 library(RSQLite)
+library(visdat)
 
+conn <- DBI::dbConnect(RSQLite::SQLite(), "vuelos.db")
 ```
 
++ Colaborador 1
 
 ```{r}
-conn <- DBI::dbConnect(RSQLite::SQLite(), "Vuelos.db")
 (tablas <- dbListTables(conn))
 (length(tablas))
 ```
 
++ Colaborador 2
+
+```{r}
+# Para cada tabla de la base de datos, se crea un objeto en R
+(aerolineas <- dbGetQuery(conn, "SELECT * FROM aerolineas"))
+(aeropuertos <- dbGetQuery(conn, "SELECT * FROM aeropuertos"))
+(aviones <- dbGetQuery(conn, "SELECT * FROM aviones"))
+(clima <- dbGetQuery(conn, "SELECT * FROM clima"))
+(vuelos <- dbGetQuery(conn, "SELECT * FROM vuelos"))
+```
+
+A continuación, se aplicarán las funciones `vis_dat()` y `vis_miss()` a cada tabla de la base de datos.
+
+**Base de datos: `aerolineas`**
+
+```{r}
+aerolineas |> vis_dat()
+aerolineas |> vis_miss()
+```
+
+De acuerdo con la primer gráfica obtenida, podemos observar que el conjunto de datos `aerolineas` contiene 2 variables de tipo caracter. En la segunda gráfica se aprecia que no contienen datos faltantes.
+
+**Base de datos: `aeropuertos`**
+
+```{r}
+aeropuertos |> vis_dat()
+aeropuertos |> vis_miss()
+```
+
+En la primer gráfica, observamos que el conjunto de datos `aeropuertos` contiene 4 variables de tipo caracter y 4 variables de tipo numérico. En ambas gráficas observamos que la variable `tzone` es la única que contiene valores faltantes.
+
+**Base de datos: `aeropuertos`**
+
+```{r}
+aviones |> vis_dat()
+aviones |> vis_miss()
+```
+
+En la primer gráfica, observamos que el conjunto de datos `aviones` contiene 5 variables de tipo caracter y 4 variables de tipo entero. En la segunda gráfica observamos que las variables `year` y `speed` son las únicas que contienen valores faltantes, con un porcentaje del 2% y 99%, respectivamente.
+
+**Base de datos: `clima`**
+
+```{r}
+clima |> vis_dat()
+clima |> vis_miss()
+```
+
+De acuerdo con la primer gráfica, observamos que el conjunto de datos `clima` contiene 1 variable de tipo caracter, 4 variables de tipo entero y 10 variables numéricas. En la segunda gráfica observamos que las variables `temp`, `dewp`, `humid`, `wind_dir`, `wind_speed`, `wind_gust` y `pressure` contienen valores faltantes.
+
+**Base de datos: `vuelos`**
+
+En cuanto al conjunto de datos `vuelos`, se intentaron ejecutar las siguientes sentencias:
+
+```
+vuelos[,1:2] |> vis_dat()
+vuelos |> vis_miss()
+```
+
+... sin embargo, generaron el siguiente error: "! Data exceeds recommended size for visualisation". Por lo tanto, se obtendrá la información de manera manual:
+
+```{r}
+# Se obtiene el tipo de dato de las variables
+aux <- data.frame()
+for(i in 1:ncol(vuelos)){
+  aux <- rbind(aux,vuelos[[i]] %>% class())
+}
+
+colnames(aux) <- "tipo_dato"
+aux %>%
+  group_by(tipo_dato) %>% 
+  summarise(n = n())
+```
+
+Observamos que el conjunto de datos `clima` contiene 4 variables de tipo caracter, 8 variables de tipo entero y 7 variables numéricas. 
+
+```{r}
+# Se obtiene el numero de valores faltantes por variable
+vuelos %>% is.na() %>% apply(2,sum)
+```
+
+Las variables que contienen datos faltantes son: `dep_time`, `dep_delay`, `arr_time`, `arr_delay`, `tailnum` y `air_time`.
