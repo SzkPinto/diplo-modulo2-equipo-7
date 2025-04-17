@@ -114,8 +114,76 @@ Las variables que contienen datos faltantes son: `dep_time`, `dep_delay`, `arr_t
 + Uso de librería skimr
 Desde su máquina crear chunks de código R en el archivo "proyecto_final.Rmd" (que obtuvo del Administrador) que use funciones de la librería {skimr} para obtener un resumen del tipo de variables, resumen de variables numéricas y resumen de variables categóricas para cada uno de los datasets que creo el Colaborador 1. Hacer commit y push del código al repositorio del administrador y revisar los pull requests de los colaboradores 1 y 2.
 
+```{r}
 library(skimr)
+```
+
++ dataset 'aerolineas'
+
+```{r}
 skim(aerolineas)
+
+
+```
++ el dataset 'aerolineas' contiene solamente dos variables, ambas de tipo caracter: 'carrier' y 'name'. No hay datos faltantes en ninguna de ellas ni celdas vacías. Cada variables tiene 16 renglones unicos.
+
+```{r}
+skim(dplyr:: select(aerolineas, where(is.numeric)))
+skim(dplyr:: select(aerolineas, where(is.character)))
+```
++ Sabemos que no hay variables numéricas en este dataset
+
+
++ Ahora analizamos el dataset 'aeropuertos'
+
+```{r}
+skim(aeropuertos)
+
+```
+
++ Se observa que el dataset 'aeropuertos' contiene 8 columnas, 4 son variables de tipo numérico y 4 de tipo character.
+
+
++ Analizamos separando,  solo las numericas o solo las categóricas usando select()
+
+
+```{r}
+skim(dplyr:: select(aeropuertos, where(is.numeric)))
+skim(dplyr:: select(aeropuertos, where(is.character)))
+```
+
+
++ Se observa que no hay datos faltantes en ninguna variable, escepto en tzone que registra 3 n_missing values. 
+
+
++ Analizamos ahora el dataset 'aviones'
+
+```{r}
+skim(aviones)
+
+```
+
++ La salida muestra que este dataset contiene 9 columnas, 5 son variables tipo character y 4 tipo numerico. Del grupo de variables numéricas hay dos con datos faltantes, speed que tiene 3299 y year con 70. Las variables categóricas no tienen missing data.
+
+
+
++ Ahora analizamos el dataset 'clima'
+
+```{r}
+skim(clima)
+
+```
++ En el dataset clima, se observan 15 columnas, solo una tipo character ('origin'). De las variables numericas solamente 4 no tienen datos faltantes: year, month, day, hour.
+
+
++ Ahora analizamos el dataset 'vuelos'
+
+```{r}
+skim(vuelos)
+
+```
++ El dataset 'vuelos' contiene 19 columnas, la mayoría de ellas son variables numéricas y solamente 4 son tipo character. Se observa que contienen 336776 renglones.De las variables character, solamente 'tailnum' tiene datos faltantes.
++ En el grupo de las variables numéricas, dep_time, dep_delay, arr_time y arr_delay tienen datos faltantes.
 skim(aeropuertos)
 skim(aviones)
 skim(clima)
