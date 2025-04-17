@@ -28,8 +28,9 @@ conn <- DBI::dbConnect(RSQLite::SQLite(), "vuelos.db")
 
 + Colaborador 2
 
+Para cada tabla de la base de datos, se crea un objeto en R:
+
 ```{r}
-# Para cada tabla de la base de datos, se crea un objeto en R
 aerolineas <- dbGetQuery(conn, "SELECT * FROM aerolineas")
 aeropuertos <- dbGetQuery(conn, "SELECT * FROM aeropuertos")
 aviones <- dbGetQuery(conn, "SELECT * FROM aviones")
