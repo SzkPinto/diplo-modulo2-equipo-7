@@ -1,3 +1,4 @@
++ Administrador del repositorio
 ---
 title: "Proyecto final módulo 2"
 author: "Equipo - 7"
@@ -108,3 +109,14 @@ vuelos %>% is.na() %>% apply(2,sum)
 ```
 
 Las variables que contienen datos faltantes son: `dep_time`, `dep_delay`, `arr_time`, `arr_delay`, `tailnum` y `air_time`.
+
+5. Administrador del equipo
++ Uso de librería skimr
+Desde su máquina crear chunks de código R en el archivo "proyecto_final.Rmd" (que obtuvo del Administrador) que use funciones de la librería {skimr} para obtener un resumen del tipo de variables, resumen de variables numéricas y resumen de variables categóricas para cada uno de los datasets que creo el Colaborador 1. Hacer commit y push del código al repositorio del administrador y revisar los pull requests de los colaboradores 1 y 2.
+
+library(skimr)
+skim(aerolineas)
+skim(aeropuertos)
+skim(aviones)
+skim(clima)
+skim(vuelos)
