@@ -30,11 +30,11 @@ conn <- DBI::dbConnect(RSQLite::SQLite(), "vuelos.db")
 
 ```{r}
 # Para cada tabla de la base de datos, se crea un objeto en R
-(aerolineas <- dbGetQuery(conn, "SELECT * FROM aerolineas"))
-(aeropuertos <- dbGetQuery(conn, "SELECT * FROM aeropuertos"))
-(aviones <- dbGetQuery(conn, "SELECT * FROM aviones"))
-(clima <- dbGetQuery(conn, "SELECT * FROM clima"))
-(vuelos <- dbGetQuery(conn, "SELECT * FROM vuelos"))
+aerolineas <- dbGetQuery(conn, "SELECT * FROM aerolineas")
+aeropuertos <- dbGetQuery(conn, "SELECT * FROM aeropuertos")
+aviones <- dbGetQuery(conn, "SELECT * FROM aviones")
+clima <- dbGetQuery(conn, "SELECT * FROM clima")
+vuelos <- dbGetQuery(conn, "SELECT * FROM vuelos")
 ```
 
 A continuación, se aplicarán las funciones `vis_dat()` y `vis_miss()` a cada tabla de la base de datos.
