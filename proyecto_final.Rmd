@@ -188,3 +188,337 @@ skim(aeropuertos)
 skim(aviones)
 skim(clima)
 skim(vuelos)
+
+
++ Segunda parte
++ Subsección 1: Vuelos de NYC
+
+
+
++ Aqui falta colocar esta sección..........................................................
+
+
++ Subsección 2: Calidad del café
++ Se usará el conjunto de datos de encuesta de café
+
++ Instalar paqueteria
+```{r}
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(ggplot2)
+library(inspectdf)
+```
+
+
+
++ Primero cargar la db 'coffee_ratings.csv'
+```{r}
+
+datos <- readr::read_csv("coffee_ratings.csv")
+
+```
+
++ Visualizamos la db recién cargada
+```{r}
+datos|> head(n=10)
+```
+
++ Actividad 0: Realice un análisis de valores faltantes del objeto datos
++ Interpretación: Se observa que 9 de las 43 variables de esta db contienen datos faltantes, estas son: owner, country_of_origin, farm_name, lot_number, mill, ico_number, company, altitude y region. De un total de 1339 renglones, la variable lot_number tiene faltantes en 1063, es decir, esta variable tiene missings en el 80% de las celdas.
+```{r}
+datos|> skim()
+```
+
+
++ Actividad 1: Crear una columna llamada color2 que se base en los valores de la columna color, que asigne el valor NA si color == NA, "#00FF66" si color == 'Green', "#CCEBC5" si color == 'Bluish-green' y "#BFFFFF" si color == 'Blue-green'
+
+```{r}
+datos<- datos |> 
+  dplyr:: mutate (color2 = case_when(
+  color =="NA" ~ "NA",
+  color == "Green"  ~ "#00FF66",
+  color == "Bluish-green" ~ "#CCEBC5",
+  color == "Blue-green" ~ "#BFFFFF",
+    TRUE ~ color,
+    ))
+
+datos$color2
+```
+
+
++ Actividad 2: Crear una columna llamada bag_weight2 que se base en los valores de la columna bag_weight, que sólo contenga el valor numérico de ésta. Es decir, bag_weight2 debe ser numérica. ¿Cuántas observaciones llevaron a ambigüedad para crear esta nueva columna?
+
+```{r}
+datos <- datos %>%
+  mutate(bag_weight2 = str_extract(bag_weight, "[0-9.]+") %>% as.numeric())
+
+head(datos$bag_weight2, n=100) #visualizamos la nueva columna
+class(datos$bag_weight2)  #verificamos que la variable sea numérica
+
+```
+
++ Actividad 3: Crear dos columnas llamadas method1 y method2 que se basen en los valores de la columna processing_method, dividiendo en dos partes los valores dicha columna. ¿Cuántas observaciones llevaron a ambigüedad para crear esta nueva columna?
+
++ Se encontraron 26 renglones con NA lo que generó problemas/ambigüedad para crear las nuevas columnas
+
+```{r}
+datos<- datos %>%   #asignando el resultado de las dos nuevas columnas de nuevo a datos
+  tidyr::separate(col = processing_method, into = c("method1", "method2"), sep = "/")
+
+```
+
+
++ Actividad 4: Crear tres columnas llamadas expiration_day, expiration_month y expiration_year que se basen en los valores de la columna expiration. ¿Cuántas observaciones llevaron a ambigüedad para crear estas nuevas columnas?
+
+```{r}
+class (datos$expiration)
+```
+
+
+
++ Primero limpiaremos las fechas y las convertimos a formato date con as.Date()
+
+
+```{r}
+
+datos <- datos %>%
+  mutate(
+    expiration = str_remove(expiration, "(st|nd|rd|th)"),  
+    expiration = parse_date_time(expiration, orders = "B d, Y", locale = "C"),
+    expiration = as.Date(expiration)
+  )
+
+class(datos$expiration)                                                
+```
+
++ En la salida vemos que hay 118 renglones que no pudieron ser convertidos a date y con unique() verificamos que son NAs y lo confirmamos con inspect_na()
+```{r}
+inspect_na(datos)
+```
+
+
++ Ahora si, extraemos el dia, mes y año y lo asignamos a nuevas columnas.
+
+```{r}
+#genera 3 nuevas columnas con el mes, dia y año
+ datos <- datos %>%
+   mutate(expiration_month = lubridate::month(`expiration`),
+         expiration_day = lubridate::day(`expiration`),
+         expiration_year = lubridate::year(`expiration`))
+
+
+```
+
++ Visualizamos las tres columnas nuevas
+```{r}
+head(datos, n=3)
+
+```
+
+Actividad 5: Crear dos columnas llamadas harvest_mes y harvest_anio que se basen en los valores de la columna harvest_year, dividiendo en dos partes los valores dicha columna. ¿Cuántas observaciones llevaron a ambigüedad para crear esta nueva columna?
+*Corregir, no funcioa*
+
+```{r}
+class(datos$harvest_year)
+
+```
++ Enseguida observamos que hay muchisimo desorden en la estructura de las entradas de la variable 'harvest_year'
+
+```{r}
+head(datos$harvest_year, n=10)
+unique(datos$harvest_year)
+```
+
+
++ Convertir primero a formato date con as.Date
+
+```{r}
+datos <- datos %>%
+  mutate(
+    harvest_date = as.Date(paste("01", harvest_year), format = "%d %B %Y"),
+    harvest_mes = month(harvest_date, label = TRUE, abbr = FALSE),  
+    harvest_anio = year(harvest_date)                               
+  ) 
+
+head(datos, n=10)
+
+```
+
+
+
+```{r}
+inspect_na(datos)
+
+```
+
++ Extraer el mes y año en dos nuevas columnas
+```{r}
+#genera 2 nuevas columnas con el mes y año
+  mutate(harvest_mes = lubridate::month(`harvest_year2`),
+         harvest_anio = lubridate::year(`harvest_year2`))
+```
+
+
+Actividad 6: Elabore una visualización con {ggplot2} que identifique alguna relación entre las columnas total_cup_points, acidity y color2 de tal forma que se puedan identificar los colores de la variable color2. Es decir, debemos ver los colores, "#00FF66", "#CCEBC5" y "#BFFFFF".
+
+```{r}
+ggplot(data=datos) +
+  geom_point(aes(x=total_cup_points, y=acidity, color=color2)) +
+labs(title = "Relación entre 'total_cup_points' y  'acidity'", x = "Total Cup Points", y = "Acidity") +
+theme_classic()
+
+
+
+#si se desea guardar con alta resolución correr estas lineas
+ggsave("grafico6_600dpi.png", 
+       plot = last_plot(), 
+       width = 8, height = 6, 
+       units = "in", 
+       dpi = 600)
+```
++ El gráfico de dispersión muestra que ambas variables están correlacionadas de forma directa, ya que la nube de puntos tiene pendiente positiva. Sin embargo, también se observa un punto rojo bastante alejado de la nube, lo que podría ser un outlier.
+
+
+
++ Actividad 7: Elabore una visualización de densidad con {ggplot2} de la variable bag_weight2 diferenciando a los valores de species.
++ Interpretación: se observa que el peso (bag_weight2) de la especie 'Arabica' es mucho mayor que el de la especie 'Robusta'
+```{r}
+ggplot(data = datos) +
+  geom_bar(aes(x = species, y = bag_weight2), stat = "identity", width = 0.3) +
+  theme_classic()
+
+
+#si se desea guardar con alta resolución correr estas lineas
+ggsave("grafico7_600dpi.png", 
+       plot = last_plot(), 
+       width = 8, height = 6, 
+       units = "in", 
+       dpi = 600)
+
+```
+
+
++ Actividad 8: Elabore una visualización que relacione el año/mes de expiración con el total_cup_points sólo de los granos mexicanos, brasileños, colombianos y guatemaltecos.
+
++ Primero creamos un dataset que contiene  solamente los renglones con pais de origen de interés
+```{r}
+datos_seleccion<- datos |> dplyr::filter(country_of_origin == "Mexico" | country_of_origin == "Brazil" | country_of_origin == "Colombia" | country_of_origin == "Guatemala" )
+```
+
+```{r}
+ggplot(data=datos_seleccion) +
+  geom_point(aes(x= expiration_month, y=total_cup_points))+
+  scale_x_continuous(breaks = 1:12) +
+  labs(title = "Relación entre 'total_cup_points' y  'expiration_month'", 
+       y = "Total Cup Points", y = "expiration_month") +
+  theme_classic()
+
+#si se desea guardar con alta resolución correr estas lineas
+ggsave("grafico8a_600dpi.png", 
+       plot = last_plot(), 
+       width = 8, height = 6, 
+       units = "in", 
+       dpi = 600)
+
+ggplot(data=datos_seleccion) +
+  geom_point(aes(x= expiration_year, y=total_cup_points))+
+  scale_x_continuous(breaks = 2011:2020) +
+    labs(title = "Relación entre 'total_cup_points' y  'expiration_year'", 
+       y = "Total Cup Points", y = "expiration_year") +
+  theme_classic()
+
+
+#si se desea guardar con alta resolución correr estas lineas
+ggsave("grafico8b_600dpi.png", 
+       plot = last_plot(), 
+       width = 8, height = 6, 
+       units = "in", 
+       dpi = 600)
+
+```
+
+
+Actividad 9: Elabore una visualización con {ggplot2} que relacione el mes de expiración con el altitude_mean_meters, altitude_low_meters y altitude_high_meters sólo de los granos mexicanos, brasileños, colombianos y guatemaltecos de los años de expiración 2016 y 2017.
+
++ Aplicamos un filtro para año de expiración restringiendo la nueva db a solo 2016 y 2017
+
+```{r}
+datos_seleccion2<- datos_seleccion |> 
+  dplyr::filter(expiration_year == "2016" | expiration_year == "2017")
+
+```
+
++ Creamos un solo gráfico dividido en tres partes, donde se muestra las relaciones de interés
+```{r}
+graf1<- ggplot(data=datos_seleccion2) +
+  geom_point(aes(x= expiration_year, y=altitude_mean_meters))+
+  scale_x_continuous(breaks = 2016:2017) +
+  labs(y = "altitude_mean_meters", y = "expiration_year") +
+  theme_classic()
+
+graf2<- ggplot(data=datos_seleccion2) +
+  geom_line(aes(x= expiration_year, y=altitude_low_meters))+
+  scale_x_continuous(breaks = 2016:2017) +
+  labs(y = "altitude_low_meters", y = "expiration_year") +
+  theme_classic()
+
+graf3<-ggplot(data=datos_seleccion2) +
+  geom_point(aes(x= expiration_year, y=altitude_high_meters))+
+  scale_x_continuous(breaks = 2016:2017) +
+  labs(y = "altitude_high_meters", y = "expiration_year") +
+  theme_classic()
+
+```
+
+```{r}
+library(patchwork)
+
+(graf1 | graf2 | graf3)
+
+#si se desea guardar con alta resolución correr estas lineas
+ggsave("grafico9_600dpi.png", 
+       plot = last_plot(), 
+       width = 8, height = 6, 
+       units = "in", 
+       dpi = 600)
+```
+
+
++ Actividad 10: Elabore una visualización con {ggplot2} que relacione el aftertaste, acidity, body y species en un mismo canvas.
+
++ Creamos un solo gráfico de dispersión donde se ubique a acidity y aftertaste en eje x y y, respectivamente. a variable body se diferenciará por el color, y las especies se agruparán en dos paneles.
+
+
+Importante: Sus visualizaciones deben tener formato suficientemente bueno para publicar en alguna revista.
+
+
+
+```{r}
+ggplot(datos, aes(x = acidity, y = aftertaste, color = body)) +
+  geom_point(size = 3, alpha = 0.7) +
+  facet_wrap(~ species) +
+  scale_color_gradient(low = "green", high = "red") +
+  labs(
+    title = "Relación entre Aftertaste, Acidity y Body según Species",
+    x = "Acidity",
+    y = "Aftertaste",
+    color = "Body"
+  ) +
+  theme_classic()
+
+#si se desea guardar con alta resolución correr estas lineas
+ggsave("grafico10_600dpi.png", 
+       plot = last_plot(), 
+       width = 8, height = 6, 
+       units = "in", 
+       dpi = 600)
+
+```
+
+
+
+
++ Sección 3: Analizando letras de canciones
++ AQUI FALTA COLOCAR ESTA SECCIÖN.............................................................
+
