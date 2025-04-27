@@ -82,7 +82,7 @@ De acuerdo con la primer gráfica, observamos que el conjunto de datos `clima` c
 En cuanto al conjunto de datos `vuelos`, se intentaron ejecutar las siguientes sentencias:
 
 ```
-vuelos[,1:2] |> vis_dat()
+vuelos |> vis_dat()
 vuelos |> vis_miss()
 ```
 
